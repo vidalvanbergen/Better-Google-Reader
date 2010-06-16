@@ -29,6 +29,14 @@ function respondToMessage(theMessageEvent) {
 
 		theMessageEvent.target.page.dispatchMessage("GetExpandButtonFromSettingsDone", expandButton);
 	}
+
+	// Listen for Widescreen
+	if(theMessageEvent.name === "GetWideScreenFromSettings")
+	{
+		wideScreen = safari.extension.settings.getItem("wideScreen");
+
+		theMessageEvent.target.page.dispatchMessage("GetWideScreenFromSettingsDone", wideScreen);
+	}
 }
 
     safari.application.addEventListener("message",respondToMessage,false);

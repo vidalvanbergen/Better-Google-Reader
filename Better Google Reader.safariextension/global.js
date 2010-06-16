@@ -26,6 +26,11 @@ function GetExpandButtonFromSettings() {
 	safari.self.tab.dispatchMessage("GetExpandButtonFromSettings");
 };
 
+// Get Unread Count setting
+function GetExpandButtonFromSettings() {
+	safari.self.tab.dispatchMessage("GetWideScreenFromSettings");
+};
+
 // Handle the message
 function messageHandler(theMessageEvent) {
 
@@ -87,6 +92,26 @@ function messageHandler(theMessageEvent) {
 
 	} // @END Unread Count
 
+
+	// Load Widescreen userscript
+	if (theMessageEvent.name === "GetWideScreenFromSettingsDone") {
+
+	// Save the message into a variable
+	wideScreen = theMessageEvent.message;
+		// If unreadCount setting returns true, inject user script
+		if(wideScreen){
+			var jsNode = document.createElement('script');
+			jsNode.type = 'text/javascript';
+			jsNode.src = safari.extension.baseURI + "googlereaderforwiderscreens.user.js";
+
+			// Wait until document is ready
+			if (document.addEventListener) {
+			  document.addEventListener("DOMContentLoaded", insertNode(jsNode), false);
+			};
+      	}
+
+	} // @END Unread Count
+
 };
 
 // Inject javascripts
@@ -101,3 +126,4 @@ safari.self.addEventListener("message", messageHandler, false);
 GetColorfulListviewFromSettings();
 GetUnreadCountFromSettings();
 GetExpandButtonFromSettings();
+GetWideScreenFromSettings();
