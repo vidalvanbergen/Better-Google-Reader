@@ -1,0 +1,39 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>global HTML page</title>
+<script type="text/javascript">
+
+function respondToMessage(theMessageEvent) {
+	// Listen for Colorful Listview
+	if(theMessageEvent.name === "GetColorfulListviewFromSettings")
+	{
+
+		colorfulListview = safari.extension.settings.getItem("colorfulListview");
+
+		theMessageEvent.target.page.dispatchMessage("GetColorfulListviewFromSettingsDone", colorfulListview);
+	}
+
+	// Listen for UnreadCount
+	if(theMessageEvent.name === "GetUnreadCountFromSettings")
+	{
+		unreadCount = safari.extension.settings.getItem("unreadCount");
+
+		theMessageEvent.target.page.dispatchMessage("GetUnreadCountFromSettingsDone", unreadCount);
+	}
+
+	// Listen for Collapse/Expand button
+	if(theMessageEvent.name === "GetExpandButtonFromSettings")
+	{
+		expandButton = safari.extension.settings.getItem("expandButton");
+
+		theMessageEvent.target.page.dispatchMessage("GetExpandButtonFromSettingsDone", expandButton);
+	}
+}
+
+    safari.application.addEventListener("message",respondToMessage,false);
+</script>
+</head>
+<body>
+</body>
+</html>
