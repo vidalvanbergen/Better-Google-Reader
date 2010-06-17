@@ -1,5 +1,11 @@
 (function() {
-var css = "#viewer-footer, #viewer-details-toggle, #viewer-header, #chrome-header, .loaded #search, #guser, #gbar, .gbh, #logo-container { display: none; !important } #main { top: 0px !important; } #chrome { margin-top: 0px !important; }";
+var css = "#viewer-footer, #viewer-details-toggle, #viewer-header,";
+	css += "#chrome-header, .loaded #search, #guser, #gbar, .gbh, #logo-container";
+	css += "{ display: none; !important }";
+
+	css += "#main { top: 0px !important; }";
+	css += "#chrome { margin-top: 0px !important; }";
+
 var heads = document.getElementsByTagName("head");
 if (heads.length > 0) {
 	var node = document.createElement("style");
