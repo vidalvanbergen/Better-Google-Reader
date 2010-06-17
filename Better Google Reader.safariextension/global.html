@@ -37,6 +37,14 @@ function respondToMessage(theMessageEvent) {
 
 		theMessageEvent.target.page.dispatchMessage("GetWideScreenFromSettingsDone", wideScreen);
 	}
+
+	// Listen for Article Focus
+	if(theMessageEvent.name === "GetArticleFocusFromSettings")
+	{
+		articleFocus = safari.extension.settings.getItem("articleFocus");
+
+		theMessageEvent.target.page.dispatchMessage("GetArticleFocusFromSettingsDone", articleFocus);
+	}
 }
 
     safari.application.addEventListener("message",respondToMessage,false);

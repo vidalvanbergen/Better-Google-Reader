@@ -31,6 +31,11 @@ function GetWideScreenFromSettings() {
 	safari.self.tab.dispatchMessage("GetWideScreenFromSettings");
 };
 
+// Get Article Focus setting
+function GetArticleFocusFromSettings() {
+	safari.self.tab.dispatchMessage("GetArticleFocusFromSettings");
+};
+
 // Handle the message
 function messageHandler(theMessageEvent) {
 
@@ -112,6 +117,26 @@ function messageHandler(theMessageEvent) {
 
 	} // @END Unread Count
 
+
+	// Load Article Focus script
+	if (theMessageEvent.name === "GetArticleFocusFromSettingsDone") {
+
+	// Save the message into a variable
+	articleFocus = theMessageEvent.message;
+		// If unreadCount setting returns true, inject user script
+		if(articleFocus){
+			var jsNode = document.createElement('script');
+			jsNode.type = 'text/javascript';
+			jsNode.src = safari.extension.baseURI + "articlefocus.js";
+
+			// Wait until document is ready
+			if (document.addEventListener) {
+			  document.addEventListener("DOMContentLoaded", insertNode(jsNode), false);
+			};
+      	}
+
+	} // @END Unread Count
+
 };
 
 // Inject javascripts
@@ -127,3 +152,4 @@ GetColorfulListviewFromSettings();
 GetUnreadCountFromSettings();
 GetExpandButtonFromSettings();
 GetWideScreenFromSettings();
+GetArticleFocusFromSettings();
