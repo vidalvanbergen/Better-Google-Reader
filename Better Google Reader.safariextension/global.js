@@ -21,13 +21,13 @@ function GetUnreadCountFromSettings() {
 	safari.self.tab.dispatchMessage("GetUnreadCountFromSettings");
 };
 
-// Get Unread Count setting
+// Get Collapse/Expand Button setting
 function GetExpandButtonFromSettings() {
 	safari.self.tab.dispatchMessage("GetExpandButtonFromSettings");
 };
 
-// Get Unread Count setting
-function GetExpandButtonFromSettings() {
+// Get Wide Screen setting
+function GetWideScreenFromSettings() {
 	safari.self.tab.dispatchMessage("GetWideScreenFromSettings");
 };
 
