@@ -45,6 +45,14 @@ function respondToMessage(theMessageEvent) {
 
 		theMessageEvent.target.page.dispatchMessage("GetArticleFocusFromSettingsDone", articleFocus);
 	}
+
+	// Listen for Inline Preview
+	if(theMessageEvent.name === "GetInlinePreviewFromSettings")
+	{
+		inlinePreview = safari.extension.settings.getItem("inlinePreview");
+
+		theMessageEvent.target.page.dispatchMessage("GetInlinePreviewFromSettingsDone", inlinePreview);
+	}
 }
 
     safari.application.addEventListener("message",respondToMessage,false);

@@ -11,6 +11,8 @@
 //         Show a "Collapse/Expand" button next to the "Previous item" / "Next item" buttons.
 */
 
+var extensionPath = safari.extension.baseURI;
+
 // Get Colorful List view setting
 function GetColorfulListviewFromSettings() {
 	safari.self.tab.dispatchMessage("GetColorfulListviewFromSettings");
@@ -36,6 +38,11 @@ function GetArticleFocusFromSettings() {
 	safari.self.tab.dispatchMessage("GetArticleFocusFromSettings");
 };
 
+// Get Inline Preview setting
+function GetInlinePreviewFromSettings() {
+	safari.self.tab.dispatchMessage("GetInlinePreviewFromSettings");
+};
+
 // Handle the message
 function messageHandler(theMessageEvent) {
 
@@ -56,9 +63,10 @@ function messageHandler(theMessageEvent) {
 			if (document.addEventListener) {
 			  document.addEventListener("DOMContentLoaded", insertNode(jsNode), false);
 			};
-      	}
+		}
 
 	} // @END Unread Count
+
 	// Load Colorful List View userscript
 	if (theMessageEvent.name === "GetColorfulListviewFromSettingsDone") {
 	// Save the message into a variable
@@ -73,7 +81,7 @@ function messageHandler(theMessageEvent) {
 			if (document.addEventListener) {
 			  document.addEventListener("DOMContentLoaded", insertNode(jsNode), false);
 			};
-      	}
+		}
 
 	} // @END Colorful List View
 
@@ -93,9 +101,9 @@ function messageHandler(theMessageEvent) {
 			if (document.addEventListener) {
 			  document.addEventListener("DOMContentLoaded", insertNode(jsNode), false);
 			};
-      	}
+		}
 
-	} // @END Unread Count
+	} // @END Expand/Collapse button
 
 
 	// Load Widescreen userscript
@@ -113,9 +121,9 @@ function messageHandler(theMessageEvent) {
 			if (document.addEventListener) {
 			  document.addEventListener("DOMContentLoaded", insertNode(jsNode), false);
 			};
-      	}
+		}
 
-	} // @END Unread Count
+	} // @END Widescreen
 
 
 	// Load Article Focus script
@@ -133,9 +141,28 @@ function messageHandler(theMessageEvent) {
 			if (document.addEventListener) {
 			  document.addEventListener("DOMContentLoaded", insertNode(jsNode), false);
 			};
-      	}
+		}
 
-	} // @END Unread Count
+	} // @END Article Focus
+
+	// Load Inline Preview userscript
+	if (theMessageEvent.name === "GetInlinePreviewFromSettingsDone") {
+
+	// Save the message into a variable
+	inlinePreview = theMessageEvent.message;
+		// If unreadCount setting returns true, inject user script
+		if(inlinePreview){
+			var jsNode = document.createElement('script');
+			jsNode.type = 'text/javascript';
+			jsNode.src = safari.extension.baseURI + "googlereaderpreviewenhanced.user.js";
+
+			// Wait until document is ready
+			if (document.addEventListener) {
+			  document.addEventListener("DOMContentLoaded", insertNode(jsNode), false);
+			};
+		}
+
+	} // @END Widescreen
 
 };
 
@@ -153,3 +180,4 @@ GetUnreadCountFromSettings();
 GetExpandButtonFromSettings();
 GetWideScreenFromSettings();
 GetArticleFocusFromSettings();
+GetInlinePreviewFromSettings();
