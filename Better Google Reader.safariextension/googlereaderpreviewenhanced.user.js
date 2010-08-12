@@ -144,7 +144,7 @@ function preview(entry)
          // iframe not in document, create it
          iframe = document.createElement('iframe');
          iframe.setAttribute('width','100%');
-         iframe.setAttribute('height','500px');
+         iframe.setAttribute('height','85%');
          iframe.setAttribute('src',getFirstElementMatchingClassName(entry,'a','entry-title-link'));
          iframe.className='preview';
          body.appendChild(iframe);
