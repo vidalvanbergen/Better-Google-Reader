@@ -57,7 +57,7 @@ function messageHandler(theMessageEvent) {
 		if(unreadCount){
 			var jsNode = document.createElement('script');
 			jsNode.type = 'text/javascript';
-			jsNode.src = safari.extension.baseURI + "googlereaderunreadcount.user.js";
+			jsNode.src = safari.extension.baseURI + "userscripts/" + "googlereaderunreadcount.user.js";
 
 			// Wait until document is ready
 			if (document.addEventListener) {
@@ -75,7 +75,7 @@ function messageHandler(theMessageEvent) {
 		if(colorfulListView){
 			var jsNode = document.createElement('script');
 			jsNode.type = 'text/javascript';
-			jsNode.src = safari.extension.baseURI + "googlereadercolorfullistview.user.js";
+			jsNode.src = safari.extension.baseURI + "userscripts/" + "googlereadercolorfullistview.user.js";
 
 			// Wait until document is ready
 			if (document.addEventListener) {
@@ -95,7 +95,7 @@ function messageHandler(theMessageEvent) {
 		if(expandButton){
 			var jsNode = document.createElement('script');
 			jsNode.type = 'text/javascript';
-			jsNode.src = safari.extension.baseURI + "googlereadercollapseexpandbutton.user.js";
+			jsNode.src = safari.extension.baseURI + "userscripts/" + "googlereadercollapseexpandbutton.user.js";
 
 			// Wait until document is ready
 			if (document.addEventListener) {
@@ -115,7 +115,7 @@ function messageHandler(theMessageEvent) {
 		if(wideScreen){
 			var jsNode = document.createElement('script');
 			jsNode.type = 'text/javascript';
-			jsNode.src = safari.extension.baseURI + "googlereaderforwiderscreens.user.js";
+			jsNode.src = safari.extension.baseURI + "userscripts/" + "googlereaderforwiderscreens.user.js";
 
 			// Wait until document is ready
 			if (document.addEventListener) {
@@ -135,7 +135,7 @@ function messageHandler(theMessageEvent) {
 		if(articleFocus){
 			var jsNode = document.createElement('script');
 			jsNode.type = 'text/javascript';
-			jsNode.src = safari.extension.baseURI + "articlefocus.js";
+			jsNode.src = safari.extension.baseURI + "userscripts/" + "articlefocus.js";
 
 			// Wait until document is ready
 			if (document.addEventListener) {
@@ -154,7 +154,7 @@ function messageHandler(theMessageEvent) {
 		if(inlinePreview){
 			var jsNode = document.createElement('script');
 			jsNode.type = 'text/javascript';
-			jsNode.src = safari.extension.baseURI + "googlereaderpreviewenhanced.user.js";
+			jsNode.src = safari.extension.baseURI + "userscripts/" + "googlereaderpreviewenhanced.user.js";
 
 			// Wait until document is ready
 			if (document.addEventListener) {
