@@ -5,54 +5,54 @@
 <script type="text/javascript">
 
 function respondToMessage(theMessageEvent) {
-	// Listen for Colorful Listview
-	if(theMessageEvent.name === "GetColorfulListviewFromSettings")
-	{
+    // Listen for Colorful Listview
+    if(theMessageEvent.name === "GetColorfulListviewFromSettings")
+    {
 
-		colorfulListview = safari.extension.settings.getItem("colorfulListview");
+        colorfulListview = safari.extension.settings.getItem("colorfulListview");
 
-		theMessageEvent.target.page.dispatchMessage("GetColorfulListviewFromSettingsDone", colorfulListview);
-	}
+        theMessageEvent.target.page.dispatchMessage("GetColorfulListviewFromSettingsDone", colorfulListview);
+    }
 
-	// Listen for UnreadCount
-	if(theMessageEvent.name === "GetUnreadCountFromSettings")
-	{
-		unreadCount = safari.extension.settings.getItem("unreadCount");
+    // Listen for UnreadCount
+    if(theMessageEvent.name === "GetUnreadCountFromSettings")
+    {
+        unreadCount = safari.extension.settings.getItem("unreadCount");
 
-		theMessageEvent.target.page.dispatchMessage("GetUnreadCountFromSettingsDone", unreadCount);
-	}
+        theMessageEvent.target.page.dispatchMessage("GetUnreadCountFromSettingsDone", unreadCount);
+    }
 
-	// Listen for Collapse/Expand button
-	if(theMessageEvent.name === "GetExpandButtonFromSettings")
-	{
-		expandButton = safari.extension.settings.getItem("expandButton");
+    // Listen for Collapse/Expand button
+    if(theMessageEvent.name === "GetExpandButtonFromSettings")
+    {
+        expandButton = safari.extension.settings.getItem("expandButton");
 
-		theMessageEvent.target.page.dispatchMessage("GetExpandButtonFromSettingsDone", expandButton);
-	}
+        theMessageEvent.target.page.dispatchMessage("GetExpandButtonFromSettingsDone", expandButton);
+    }
 
-	// Listen for Widescreen
-	if(theMessageEvent.name === "GetWideScreenFromSettings")
-	{
-		wideScreen = safari.extension.settings.getItem("wideScreen");
+    // Listen for Widescreen
+    if(theMessageEvent.name === "GetWideScreenFromSettings")
+    {
+        wideScreen = safari.extension.settings.getItem("wideScreen");
 
-		theMessageEvent.target.page.dispatchMessage("GetWideScreenFromSettingsDone", wideScreen);
-	}
+        theMessageEvent.target.page.dispatchMessage("GetWideScreenFromSettingsDone", wideScreen);
+    }
 
-	// Listen for Article Focus
-	if(theMessageEvent.name === "GetArticleFocusFromSettings")
-	{
-		articleFocus = safari.extension.settings.getItem("articleFocus");
+    // Listen for Article Focus
+    if(theMessageEvent.name === "GetArticleFocusFromSettings")
+    {
+        articleFocus = safari.extension.settings.getItem("articleFocus");
 
-		theMessageEvent.target.page.dispatchMessage("GetArticleFocusFromSettingsDone", articleFocus);
-	}
+        theMessageEvent.target.page.dispatchMessage("GetArticleFocusFromSettingsDone", articleFocus);
+    }
 
-	// Listen for Inline Preview
-	if(theMessageEvent.name === "GetInlinePreviewFromSettings")
-	{
-		inlinePreview = safari.extension.settings.getItem("inlinePreview");
+    // Listen for Inline Preview
+    if(theMessageEvent.name === "GetInlinePreviewFromSettings")
+    {
+        inlinePreview = safari.extension.settings.getItem("inlinePreview");
 
-		theMessageEvent.target.page.dispatchMessage("GetInlinePreviewFromSettingsDone", inlinePreview);
-	}
+        theMessageEvent.target.page.dispatchMessage("GetInlinePreviewFromSettingsDone", inlinePreview);
+    }
 }
 
     safari.application.addEventListener("message",respondToMessage,false);
