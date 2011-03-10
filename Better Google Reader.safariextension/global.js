@@ -50,6 +50,11 @@ function GetInlinePreviewFromSettings() {
     safari.self.tab.dispatchMessage("GetInlinePreviewFromSettings");
 };
 
+// Get Starred Counter setting
+function GetStarredCounterFromSettings() {
+    safari.self.tab.dispatchMessage("GetStarredCounterFromSettings");
+};
+
 // Handle the message
 function messageHandler(theMessageEvent) {
 
@@ -170,6 +175,25 @@ function messageHandler(theMessageEvent) {
         }
 
     } // @END Widescreen
+    
+    // Load Starred Counter userscript
+    if (theMessageEvent.name === "GetStarredCounterFromSettingsDone") {
+
+    // Save the message into a variable
+    starredcounter = theMessageEvent.message;
+        // If starredcounter setting returns true, inject user script
+        if(starredcounter){
+            var jsNode = document.createElement('script');
+            jsNode.type = 'text/javascript';
+            jsNode.src = safari.extension.baseURI + "userscripts/" + "googlereaderstarredcounter.user.js";
+
+            // Wait until document is ready
+            if (document.addEventListener) {
+                document.addEventListener("DOMContentLoaded", insertNode(jsNode), false);
+            };
+        }
+
+    } // @END Widescreen
 
 };
 
@@ -188,3 +212,4 @@ GetExpandButtonFromSettings();
 GetWideScreenFromSettings();
 GetArticleFocusFromSettings();
 GetInlinePreviewFromSettings();
+GetStarredCounterFromSettings();

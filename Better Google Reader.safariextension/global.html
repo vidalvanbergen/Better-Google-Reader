@@ -53,6 +53,15 @@ function respondToMessage(theMessageEvent) {
 
         theMessageEvent.target.page.dispatchMessage("GetInlinePreviewFromSettingsDone", inlinePreview);
     }
+    
+    // Listen for Starred Counter
+    if(theMessageEvent.name === "GetStarredCounterFromSettings")
+    {
+
+        starredCounter = safari.extension.settings.getItem("starredcounter");
+
+        theMessageEvent.target.page.dispatchMessage("GetStarredCounterFromSettingsDone", starredCounter);
+    }
 }
 
     safari.application.addEventListener("message",respondToMessage,false);
