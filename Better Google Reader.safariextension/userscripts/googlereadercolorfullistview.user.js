@@ -5,7 +5,7 @@
 // @include        https://www.google.com/reader/*
 // @include        http://userscripts.org/scripts/source/8782.meta.js
 // @description    Colorizes the item headers in Google Reader list view and the entries in expanded view.
-// @version        20100227
+// @version        20110216
 // ==/UserScript==
 /*jslint browser: true, forin: true */
 /*globals XPathResult, GM_getValue, GM_setValue, localStorage, unescape,
@@ -14,9 +14,8 @@ frameElement */
 "use strict";
 
 /**
- * TODO:
- * Grab css for entry background colors from the page.
- * Smoother insertion of update notification.
+ * 20110227
+ * Update for Greasemonkey 9.0 compatibility
  **
  * 20100227
  * Fix for updates not showing.
@@ -64,7 +63,7 @@ frameElement */
  * Works on expanded view too now. Possible/easier with Google Reader now using
  *  CSS for rounded borders.
  **
- * 20081104
+ * 20081104 
  * Added settings for coloring read/unread items.
  * Adjusted things in the settings.
  **
@@ -75,15 +74,14 @@ frameElement */
  *   list.
  **/
 
-
 // var script = document.createElement("script");
-// script.innerHTML = "(" +
+// script.innerHTML = "(" + 
 ( function() {
 
   // info used to check for script updates
   var SCRIPT_INFO = {
-    version:    "20100227",
-    date:       "Sat, 27 Feb 2010 06:33:27 GMT",
+    version:    "20110216",
+    date:       "Wed, 16 Feb 2011 19:07:18 GMT",
     updateUrl:  "http://userscripts.org/scripts/source/8782.meta.js",
     installUrl: "http://userscripts.org/scripts/source/8782.user.js"
   };
@@ -148,7 +146,7 @@ frameElement */
     msgUnread:   "Unread items ",
     msgRead:     "Read items ",
     msgUndef:    "Undefined",
-
+    
     update:      "Userscript Update Available",
     install:     "Install"
   };
@@ -163,7 +161,7 @@ frameElement */
 
   function $x( query, context ) {
     var doc = ( context ) ? context.ownerDocument : document;
-    return doc.evaluate( query, ( context || doc ), null,
+    return doc.evaluate( query, ( context || doc ), null, 
            XPathResult.FIRST_ORDERED_NODE_TYPE, null ).singleNodeValue;
   }
 
@@ -185,7 +183,7 @@ frameElement */
     document.getElementsByTagName( "head" )[0].appendChild( style );
     return style;
   }
-
+  
   function bind( func, thisArg ) {
     var args = Array.prototype.slice.call( arguments, 2 );
 
@@ -207,6 +205,7 @@ frameElement */
       // Google Chrome dev channel stubs GM_ functions with error messages
       // test it's the real deal by looking for "arguments"
       if ( typeof GM_getValue != "undefined" &&
+           typeof GM_getValue.toString != "undefined" &&
            (/arguments/).test( GM_getValue.toString() ) ) {
         this.getItem = GM_getValue;
         this.setItem = GM_setValue;
@@ -432,13 +431,13 @@ frameElement */
                  ( id == "gm-color-ev" ) ? STRINGS.msgExpanded :
                  ( id == "gm-color-ef" ) ? STRINGS.msgFrame :
                  ( id == "gm-color-ui" ) ? STRINGS.msgUnread :
-                 ( id == "gm-color-ri" ) ? STRINGS.msgRead :
+                 ( id == "gm-color-ri" ) ? STRINGS.msgRead : 
                  ( id == "gm-color-cv" ) ? STRINGS.msgComment :
                  STRINGS.msgUndef;
 
-      var newMsg = type + msg + STRINGS.msgColored;
+      var newMsg = type + msg + STRINGS.msgColored; 
       inner.innerHTML = newMsg; // set the message
-
+      
       // force display and set position and width
       outer.setAttribute( "style", "display: block !important;" +
                           "margin-left:" +
@@ -499,7 +498,7 @@ frameElement */
       var entries = $id( "entries" );
 
       if ( entries ) {
-        entries.className = prefs + entries.className;
+        entries.className = prefs + entries.className; 
         entries.addEventListener( "DOMNodeInserted",
                                   bind( this.process, this ), false );
       }
@@ -583,21 +582,21 @@ frameElement */
       this.styles.textContent += ( "" +
         "#entries .collapsed .entry-title {" +
         css + lt + "% ) !important;" + // 000000 <- default color
-        "}" +
+        "}" + 
         "#entries.list .collapsed .entry-main .entry-source-title {" +
         css + ( lt + range*0.42 ) + "% ) !important;" + // 555555
-        "}" +
+        "}" + 
         ".entry .entry-author," +
         ".entry-comments .comment-time, .entry .entry-date {" +
         css + ( lt + range*0.50 ) + "% ) !important;" + // 666666
-        "}" +
+        "}" + 
         "#entries.list .collapsed .entry-secondary {" +
         css + ( lt + range*0.59 ) + "% ) !important;" + // 777777
         "}" +
         // "a, a:visited, .link {" + // shouldn't need to mess with link color
         // css + lt + "% ) !important;" + // 2244BB
-        // "}" +
-        "#entries .item-body {" +
+        // "}" + 
+        "#entries .item-body {" + 
         css + lt + "% ) !important;" + // 000000
         "}" );
     },
@@ -646,11 +645,11 @@ frameElement */
       // set direction entry lightness is modified on read/hover
       var dir = ( lt > 50 ) ? 1 : -1;
 
-      var hsl = {
+      var hsl = { 
         norm: "background-color: hsl(" +
           hue + "," + ( sat + 7 ) + "%," + ( lt - dir*5 )+ "% ) !important;",
         hover: "background-color: hsl(" +
-          hue + "," + ( sat + 27 ) + "%, " + ( lt + dir*8 ) + "% ) !important;",
+          hue + "," + ( sat + 27 ) + "%, " + lt + "% ) !important;",
         read: "background-color: hsl(" +
           hue + "," + ( sat - 13 ) + "%," + ( lt + dir*5 ) + "% ) !important;",
         readhvr: "background-color: hsl(" +
