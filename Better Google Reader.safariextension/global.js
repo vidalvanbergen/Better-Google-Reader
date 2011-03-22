@@ -55,6 +55,11 @@ function GetStarredCounterFromSettings() {
     safari.self.tab.dispatchMessage("GetStarredCounterFromSettings");
 };
 
+// Get Starred Counter setting
+function GetNoLikesFromSettings() {
+    safari.self.tab.dispatchMessage("GetNoLikesFromSettings");
+};
+
 // Handle the message
 function messageHandler(theMessageEvent) {
 
@@ -175,7 +180,7 @@ function messageHandler(theMessageEvent) {
         }
 
     } // @END Widescreen
-    
+
     // Load Starred Counter userscript
     if (theMessageEvent.name === "GetStarredCounterFromSettingsDone") {
 
@@ -193,7 +198,27 @@ function messageHandler(theMessageEvent) {
             };
         }
 
-    } // @END Widescreen
+    } // @END Starred Counter
+
+
+    // Load No Likes userscript
+    if (theMessageEvent.name === "GetNoLikesFromSettingsDone") {
+
+    // Save the message into a variable
+    nolikes = theMessageEvent.message;
+        // If starredcounter setting returns true, inject user script
+        if(nolikes){
+            var jsNode = document.createElement('script');
+            jsNode.type = 'text/javascript';
+            jsNode.src = safari.extension.baseURI + "userscripts/" + "googlereadernolikes.user.js";
+
+            // Wait until document is ready
+            if (document.addEventListener) {
+                document.addEventListener("DOMContentLoaded", insertNode(jsNode), false);
+            };
+        }
+
+    } // @END Starred Counter
 
 };
 
@@ -213,3 +238,4 @@ GetWideScreenFromSettings();
 // GetArticleFocusFromSettings();
 GetInlinePreviewFromSettings();
 GetStarredCounterFromSettings();
+GetNoLikesFromSettings();

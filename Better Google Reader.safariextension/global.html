@@ -62,6 +62,15 @@ function respondToMessage(theMessageEvent) {
 
         theMessageEvent.target.page.dispatchMessage("GetStarredCounterFromSettingsDone", starredCounter);
     }
+    
+    // Listen for No Likes
+    if(theMessageEvent.name === "GetNoLikesFromSettings")
+    {
+
+        starredCounter = safari.extension.settings.getItem("nolikes");
+
+        theMessageEvent.target.page.dispatchMessage("GetNoLikesFromSettingsDone", starredCounter);
+    }
 }
 
     safari.application.addEventListener("message",respondToMessage,false);
