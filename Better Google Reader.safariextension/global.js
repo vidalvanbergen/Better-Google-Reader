@@ -36,9 +36,9 @@ function GetExpandButtonFromSettings() {
 };
 
 // Get Wide Screen setting
-function GetWideScreenFromSettings() {
+/*function GetWideScreenFromSettings() {
     safari.self.tab.dispatchMessage("GetWideScreenFromSettings");
-};
+};*/
 
 // Get Article Focus setting
 function GetArticleFocusFromSettings() {
@@ -119,7 +119,7 @@ function messageHandler(theMessageEvent) {
 
 
     // Load Widescreen userscript
-    if (theMessageEvent.name === "GetWideScreenFromSettingsDone") {
+    /*if (theMessageEvent.name === "GetWideScreenFromSettingsDone") {
 
     // Save the message into a variable
     wideScreen = theMessageEvent.message;
@@ -135,7 +135,7 @@ function messageHandler(theMessageEvent) {
             };
         }
 
-    } // @END Widescreen
+    } // @END Widescreen */
 
 
     // Load Article Focus script
@@ -209,7 +209,7 @@ safari.self.addEventListener("message", messageHandler, false);
 GetColorfulListviewFromSettings();
 GetUnreadCountFromSettings();
 GetExpandButtonFromSettings();
-GetWideScreenFromSettings();
+// GetWideScreenFromSettings();
 GetArticleFocusFromSettings();
 GetInlinePreviewFromSettings();
 GetStarredCounterFromSettings();
