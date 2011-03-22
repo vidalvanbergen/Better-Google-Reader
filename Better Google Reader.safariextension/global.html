@@ -31,20 +31,20 @@ function respondToMessage(theMessageEvent) {
     }
 
     // Listen for Widescreen
-    /*if(theMessageEvent.name === "GetWideScreenFromSettings")
+    if(theMessageEvent.name === "GetWideScreenFromSettings")
     {
         wideScreen = safari.extension.settings.getItem("wideScreen");
 
         theMessageEvent.target.page.dispatchMessage("GetWideScreenFromSettingsDone", wideScreen);
-    }*/
+    }
 
     // Listen for Article Focus
-    if(theMessageEvent.name === "GetArticleFocusFromSettings")
+    /*if(theMessageEvent.name === "GetArticleFocusFromSettings")
     {
         articleFocus = safari.extension.settings.getItem("articleFocus");
 
         theMessageEvent.target.page.dispatchMessage("GetArticleFocusFromSettingsDone", articleFocus);
-    }
+    }*/
 
     // Listen for Inline Preview
     if(theMessageEvent.name === "GetInlinePreviewFromSettings")

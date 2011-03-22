@@ -40,16 +40,6 @@
 	</dict>
 	<dict>
 		<key>DefaultValue</key>
-		<false/>
-		<key>Key</key>
-		<string>articleFocus</string>
-		<key>Title</key>
-		<string>Article Focus</string>
-		<key>Type</key>
-		<string>CheckBox</string>
-	</dict>
-	<dict>
-		<key>DefaultValue</key>
 		<true/>
 		<key>Key</key>
 		<string>inlinePreview</string>
@@ -67,6 +57,16 @@
 		<string>Starred Counter</string>
 		<key>TrueValue</key>
 		<true/>
+		<key>Type</key>
+		<string>CheckBox</string>
+	</dict>
+	<dict>
+		<key>DefaultValue</key>
+		<true/>
+		<key>Key</key>
+		<string>wideScreen</string>
+		<key>Title</key>
+		<string>Wide Screen</string>
 		<key>Type</key>
 		<string>CheckBox</string>
 	</dict>
