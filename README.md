@@ -3,31 +3,26 @@
 This extension combines a couple of user scripts, and lets you select which ones to apply to Google Reader, current scripts include:
 
 <ul>
-	<li>
+	<!--li>
 		Unread Counter
 		(<a href="http://userscripts.org/scripts/show/12601">Script 12601</a>)
 		<ul><li>(Display actual unread count instead of "1000+" in Google Reader)</li></ul>
-	</li>
+	</li-->
 	<li>
 		Colorful Listview
 		(<a href="http://userscripts.org/scripts/show/8782">Script 8782</a>)
 		<ul><li>(Colorizes the items in Google Reader list view, expanded view and comment view.)</li></ul>
 	</li>
 	<li>
-		Collapse/Expand button
-		(<a href="http://userscripts.org/scripts/show/53061">Script 53061</a>)
-		<ul><li>(Add a collapse/expand button next to "next item" button.)</li></ul>
-	</li>
-	<li>
 		Widescreen support
 		(<a href="http://userscripts.org/scripts/show/74201">Script 74201</a>)
 		<ul><li>(Use all the available screen real estate in the reading pane to display the article.)</li></ul>
 	</li>
-	<li>
-		Article Focus
-		(Self made)
-		<ul><li>(Focus on the articles by hiding the header and footer, a good knowledge of the <a href="http://www.google.com/support/reader/bin/answer.py?hl=en&amp;answer=69973">keyboard shortcuts</a> come in handy here.)</li></ul>
-	</li>
+  <li>
+      Starred Counter
+      <!-->(<a href="http://userscripts.org/scripts/show/74201">Script 74201</a>)-->
+      <ul><li>(Show the count for all starred articles.)</li></ul>
+  </li>
 	<li>More to come! send in your suggestions!</li>
 </ul>
 
@@ -44,6 +39,6 @@ Enable Safari 5 Extensions
 How to Install
 --------------
 
-1. Download [Better Google Reader.safariextz](http://github.com/downloads/vidalvanbergen/Better-Google-Reader/Better%20Google%20Reader.safariextz)
+1. Download [Better Google Reader.safariextz](http://github.com/downloads/vidalvanbergen/Better-Google-Reader/Better%20Google%20Reader%20v1.0.safariextz)
 
 2. Double click the .safariextz file to install in Safari 5 and follow the prompts
