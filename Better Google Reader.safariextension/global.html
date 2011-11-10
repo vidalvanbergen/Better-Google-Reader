@@ -22,14 +22,6 @@ function respondToMessage(theMessageEvent) {
         theMessageEvent.target.page.dispatchMessage("GetUnreadCountFromSettingsDone", unreadCount);
     }
 
-    // Listen for Collapse/Expand button
-    if(theMessageEvent.name === "GetExpandButtonFromSettings")
-    {
-        expandButton = safari.extension.settings.getItem("expandButton");
-
-        theMessageEvent.target.page.dispatchMessage("GetExpandButtonFromSettingsDone", expandButton);
-    }
-
     // Listen for Widescreen
     if(theMessageEvent.name === "GetWideScreenFromSettings")
     {
@@ -63,14 +55,6 @@ function respondToMessage(theMessageEvent) {
         theMessageEvent.target.page.dispatchMessage("GetStarredCounterFromSettingsDone", starredCounter);
     }
     
-    // Listen for No Likes
-    if(theMessageEvent.name === "GetNoLikesFromSettings")
-    {
-
-        starredCounter = safari.extension.settings.getItem("nolikes");
-
-        theMessageEvent.target.page.dispatchMessage("GetNoLikesFromSettingsDone", starredCounter);
-    }
 }
 
     safari.application.addEventListener("message",respondToMessage,false);

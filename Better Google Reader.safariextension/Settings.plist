@@ -32,16 +32,6 @@
 		<key>DefaultValue</key>
 		<true/>
 		<key>Key</key>
-		<string>expandButton</string>
-		<key>Title</key>
-		<string>Collapse/Expand button</string>
-		<key>Type</key>
-		<string>CheckBox</string>
-	</dict>
-	<dict>
-		<key>DefaultValue</key>
-		<true/>
-		<key>Key</key>
 		<string>inlinePreview</string>
 		<key>Title</key>
 		<string>Inline Preview</string>
@@ -67,16 +57,6 @@
 		<string>wideScreen</string>
 		<key>Title</key>
 		<string>Wide Screen</string>
-		<key>Type</key>
-		<string>CheckBox</string>
-	</dict>
-	<dict>
-		<key>DefaultValue</key>
-		<false/>
-		<key>Key</key>
-		<string>nolikes</string>
-		<key>Title</key>
-		<string>Hide "# people liked this"</string>
 		<key>Type</key>
 		<string>CheckBox</string>
 	</dict>

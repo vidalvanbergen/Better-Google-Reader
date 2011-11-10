@@ -3,21 +3,50 @@
 // @namespace      http://google.reader.colorful.list.view/kepp
 // @include        http://www.google.com/reader/*
 // @include        https://www.google.com/reader/*
+// @include        http://www.google.tld/reader/*
+// @include        https://www.google.tld/reader/*
 // @include        http://userscripts.org/scripts/source/8782.meta.js
-// @description    Colorizes the item headers in Google Reader list view and the entries in expanded view.
-// @version        20110216
+// @description    Colors items in Google Reader.
+// @author         kepp
+// @jsversion      1.6
+// @updateURL      http://userscripts.org/scripts/source/8782.meta.js
+// @version        20111105
 // ==/UserScript==
-/*jslint browser: true, forin: true */
-/*globals XPathResult, GM_getValue, GM_setValue, localStorage, unescape,
-frameElement */
 
-"use strict";
 
 /**
- * 20110227
+ * 2011-11-05
+ * Remove JSLint config sections and other testing leftovers.
+ * Remove $id shortcut function. Inline function.
+ * Remove $x shortcut function. Replace with getElementById/ClassName.
+ * Remove $xa shortcut function. Replace with getElementsByClassName NodeList.
+ * Change test for undefined to use "void 0".
+ * Change base css from global variable to theme controller object property.
+ * Reorgaize storage code and change tests for GM and DOM Stroage.
+ * Update string property names to be more consistent, maybe.
+ * Use strict equality operators for everything.
+ * Use stricter version parsing regular expression in updater.
+ * Don't run in sharing bookmarklet popup iframe.
+ * Simplify hue calculation process.
+ * Clean up rgb color parsing.
+ * Simplify hsl color calculation.
+ * Move script info from global variable to property of updater.
+ * Use decode/encodeURIComponent instead of un/escape for cookies.
+ * Declare variables at top of scope and use single var statement.
+ * Better date formatting in change log.
+ * Disabled updater code until better solution is found.
+ * Remove Comment View/Google Buzz support.
+ * Fix for Google Reader style update.
+ * - New id for element we're sampling to try and match page theme.
+ * - Adjusted script for greater entry heights.
+ * - Removed image replacement for link to external article.
+ * - Added semi-transparent card actions background.
+ * - Removed unused CSS.
+ **
+ * 2011-02-27
  * Update for Greasemonkey 9.0 compatibility
  **
- * 20100227
+ * 2010-02-27
  * Fix for updates not showing.
  * Substituted custom image for those used to link to the original article.
  * Consolidated where styles are inserted.
@@ -27,25 +56,25 @@ frameElement */
  * Added option to color "Comment view".
  * Fix for incorrect pref display in Google Chrome.
  **
- * 20091122
+ * 2009-11-22
  * Fix for breakage on expanded view.
  * CSS modified to increase selector priority to ensure colors get applied.
  **
- * 20091120
+ * 2009-11-20
  * Fix pref settings when DOM Storage is used.
  * Fix for GM_getValue detection on Google Chrome dev channel.
  * Fix for not working after encountering a shared item. Script also works on
  *  the "Your stuff", Shared Items and Notes pages with this.
  * Switch code bracing style.
  **
- * 20091117
+ * 2009-11-17
  * Added prefs to select what is colored in expanded view, entry body or
  *  outline.
  * Fix for update version check being in the wrong direction.
  * Fix for coloring unread items only in list view.
  * Added Google Chrome support.
  **
- * 20090822
+ * 2009-08-22
  * Fix to ensure that all items get colored.
  * Fixes for Google Reader update.
  * Added script update notification to the settings page.
@@ -56,125 +85,59 @@ frameElement */
  * Cleaned up some code.
  * Also added DOM Storage fallback option.
  * *
- * 20081214
+ * 2008-12-14
  * Prefs split out into independent items and updated to apply instantly.
  *  Pref notification messages are also fixed to work properly.
  * Fix for script not working if Google Gears was installed (my bad design).
  * Works on expanded view too now. Possible/easier with Google Reader now using
  *  CSS for rounded borders.
  **
- * 20081104 
+ * 2008-11-04
  * Added settings for coloring read/unread items.
  * Adjusted things in the settings.
  **
- * 20080730
+ * 2008-07-30
  * Fixed css mistake of read items not being colored.
  * Added https:// url to the include list.
  * Added coloring option on settings page, added settings page to the exclude
  *   list.
  **/
 
-// var script = document.createElement("script");
-// script.innerHTML = "(" + 
 ( function() {
-
-  // info used to check for script updates
-  var SCRIPT_INFO = {
-    version:    "20110216",
-    date:       "Wed, 16 Feb 2011 19:07:18 GMT",
-    updateUrl:  "http://userscripts.org/scripts/source/8782.meta.js",
-    installUrl: "http://userscripts.org/scripts/source/8782.user.js"
-  };
-
-  // CSS to allow items to be colored
-  var BASE_CSS = "" +
-    "#entries .entry-likers, /* like count */" +
-    "#entries.list .collapsed .entry-source-title," +
-    "#entries.list .collapsed .entry-secondary," +
-    "#entries.list .collapsed .entry-title," +
-    "#entries.comment-cards .entry-comments {" +
-    "  background-color: transparent !important;" +
-    "}" +
-    ".gm-color-lv .collapsed, /* list view headers */" +
-    "#entries.comment-cards .entry .comment-entry /* comment view */ {" +
-    "  border-color: transparent !important;" +
-    "}" +
-    "#entries.list.gm-color-lv #current-entry .collapsed {" +
-    "  border: 2px solid #8181DC !important;" +
-    "}" +
-    "#entries.list.gm-color-lv #current-entry.expanded .collapsed {" +
-    "  border-bottom-color: transparent !important;" +
-    "  border-width: 2px 0 !important;" +
-    "}" +
-    "#entries .entry {" +
-    "  padding: 5px 0;" +
-    "}" +
-    "#entries.list .collapsed {" +
-    "  line-height: 2.4ex !important; /* hide entry snippet 2nd line */" +
-    "}" +
-    "#entries .collapsed .entry-original," +
-    ".entry .entry-title .entry-title-go-to { /* article link image */" +
-    "  background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAA" +
-    "AOBAMAAADtZjDiAAAALVBMVEX////R3fPm6/nJ1PPV3vXc5fbCz/He5fjCz/H////U3/Tj6" +
-    "fjr7/r3+f3O2fTPDCQ+AAAAB3RSTlMA71DmxK0A9H5uGAAAAFtJREFUeF41jbEJgEAUQx+C" +
-    "G1hYCm4gOICdpeACh5sIwk+jAxw3yI3iOY0I/jSBkLxANanpgFXSCLU+LfSWLWtgtmRJB+1" +
-    "VnnLvSGc8o9w9957vnPNzA2zfT3gBaL8sJRF+PgoAAAAASUVORK5CYII=')" +
-    "  no-repeat !important;" +
-    "}" +
-    ".entry .entry-title .entry-title-go-to {" +
-    "  background-position: left 3px !important;" +
-    "}";
 
   var STRINGS = {
     // pref labels
-    color:       "Color these items:",
-    list:        "List view headers.",
-    expanded:    "Expanded view entry bodies.",
-    frame:       "Expanded view entry frames.",
-    comment:     "Comment view entries.",
-    read:        "Read items.",
-    unread:      "Unread items.",
+    colorLbl:   "Color these items:",
+    lvLbl:      "List view headers.",
+    evLbl:      "Expanded view entry bodies.",
+    efLbl:      "Expanded view entry frames.",
+    // cvLbl:      "Comment view entries.",
+    riLbl:      "Read items.",
+    uiLbl:      "Unread items.",
+    updateLbl:  "Userscript Update Available",
+    installLbl: "Install",
 
     // pref messages
-    msgWill:     "will",
-    msgWillNot:  "will not",
-    msgColored:  " be colored.",
-    msgList:     "List view items ",
-    msgExpanded: "Expanded view entry bodies ",
-    msgFrame:    "Expanded view entry frames ",
-    msgComment:  "Comment view items ",
-    msgUnread:   "Unread items ",
-    msgRead:     "Read items ",
-    msgUndef:    "Undefined",
-    
-    update:      "Userscript Update Available",
-    install:     "Install"
-  };
+    setMsg:     "will",
+    unsetMsg:   "will not",
+    colorMsg:   " be colored.",
+    lvMsg:      "List view items ",
+    evMsg:      "Expanded view entry bodies ",
+    efMsg:      "Expanded view entry frames ",
+    // cvMsg:      "Comment view items ",
+    uiMsg:      "Unread items ",
+    riMsg:      "Read items ",
+    udMsg:      "Undefined",
+  },
+
+  storage = null,
+  updater = null,
+  settings = null,
+  theme = null;
 
 
 //=============================================================================
 
-
-  function $id( id ) {
-    return document.getElementById( id );
-  }
-
-  function $x( query, context ) {
-    var doc = ( context ) ? context.ownerDocument : document;
-    return doc.evaluate( query, ( context || doc ), null, 
-           XPathResult.FIRST_ORDERED_NODE_TYPE, null ).singleNodeValue;
-  }
-
-  function $xa( query ) {
-    var res = document.evaluate( query, document, null,
-              XPathResult.UNORDERED_NODE_ITERATOR_TYPE, null );
-    var element, array = [];
-    while ( ( element = res.iterateNext() ) ) {
-      array.push( element );
-    }
-
-    return array;
-  }
 
   function addStyle( css ) {
     var style = document.createElement( "style" );
@@ -183,7 +146,7 @@ frameElement */
     document.getElementsByTagName( "head" )[0].appendChild( style );
     return style;
   }
-  
+
   function bind( func, thisArg ) {
     var args = Array.prototype.slice.call( arguments, 2 );
 
@@ -198,24 +161,57 @@ frameElement */
 
 
   // provide local data storage
-  var storage = {
+  // use cookies by default and override with GM_* or localStorage if available
+  storage = {
     cookie: {},
 
     init: function() { // initialize methods for data storage access
-      // Google Chrome dev channel stubs GM_ functions with error messages
-      // test it's the real deal by looking for "arguments"
-      if ( typeof GM_getValue != "undefined" &&
-           typeof GM_getValue.toString != "undefined" &&
-           (/arguments/).test( GM_getValue.toString() ) ) {
-        this.getItem = GM_getValue;
-        this.setItem = GM_setValue;
+      var pairs, cookie;
+
+      if ( this.testGMStorage() || this.testDOMStorage() ) {
         return;
       }
+
+      pairs = {};
+      cookie = decodeURIComponent( document.cookie );
+      if ( /gm-color=([\w-:]+);/.test( cookie ) ) {
+        cookie = RegExp.$1;
+
+        cookie.split( "/" ).forEach( function( pair ) {
+          var set = pair.split( ":" );
+          pairs[ set[ 0 ] ] = set[ 1 ];
+        } );
+      }
+
+      this.cookie = pairs;
+    },
+
+    testGMStorage: function() {
+
+      // test for existance of GM_setValue and GM_getValue
+      // Google Chrome stubs these functions with 'not supported' messages
+      if ( typeof GM_getValue === "function" &&
+           typeof GM_setValue === "function" ) {
+        GM_setValue( "test", "test value" );
+
+        if ( GM_getValue( "test" ) === "test value" ) {
+          if ( typeof GM_deleteValue === "function" ) {
+            GM_deleteValue( "test" );
+          }
+          this.getItem = GM_getValue;
+          this.setItem = GM_setValue;
+          return true;
+        }
+      }
+
+    },
+
+    testDOMStorage: function() {
 
       // Google Chrome gives null for localStorage if not enabled,
       // Opera gives undefined
       // http://www.w3.org/TR/webstorage/#the-storage-interface
-      if ( typeof localStorage != "undefined" && localStorage !== null ) {
+      if ( localStorage !== void 0 && localStorage !== null ) {
 
         this.getItem = function( key, def ) {
           var value = localStorage.getItem( key );
@@ -227,64 +223,58 @@ frameElement */
         };
         return;
       }
-
-      var pairs = {};
-      if ( /gm-color=([^;]*)/.test( unescape( document.cookie ) ) ) {
-        var cookie = RegExp.$1;
-
-        cookie.split( "/" ).forEach( function( pair ) {
-          var set = pair.split( ":" );
-          pairs[ set[ 0 ] ] = set[ 1 ];
-        } );
-      }
-
-      this.cookie = pairs;
     },
 
     getItem: function( name, def ) {
       var cookieVal = this.cookie[ name ];
-      return ( typeof cookieVal == "undefined" ) ? def : cookieVal;
+      return cookieVal === void 0 ? def : cookieVal;
     },
 
     setItem: function( name, value ) {
-      this.cookie[ name ] = value;
-      var strCookie = "gm-color=";
+      var strCookie = "gm-color=",
+          future = new Date( ( new Date().getTime() + 10*365*24*60*60*1000 ) ),
+          prop = "";
 
-      for ( var prop in this.cookie ) {
+      this.cookie[ name ] = value;
+
+      for ( prop in this.cookie ) {
         strCookie += prop + ":" + this.cookie[ prop ] + "/";
       }
 
-      var future = new Date( ( new Date().getTime() + 10*365*24*60*60*1000 ) );
       strCookie += ";path=/reader;expires=" + future.toGMTString();
 
-      document.cookie = strCookie;
+      document.cookie = encodeURIComponent( strCookie );
     }
   };
 
   // script updater
-  var updater = {
+  updater = {
     loader: null,
-    version: 0,
-    homeUrl: "",
-    updateUrl: "",
-    installUrl: "",
+
+    // info used to check for script updates
+    scriptInfo: {
+      version:    "20110216",
+      date:       "Wed, 16 Feb 2011 19:07:18 GMT",
+      updateUrl:  "http://userscripts.org/scripts/source/8782.meta.js",
+      installUrl: "http://userscripts.org/scripts/source/8782.user.js"
+    },
 
     init: function() {
-      for ( var prop in SCRIPT_INFO ) {
-        this[ prop ] = SCRIPT_INFO[ prop ];
-      }
+      var loader;
 
       // test if this is the script meta info page that loaded
-      if ( location.href == SCRIPT_INFO.updateUrl ) {
+      if ( location.href === this.scriptInfo.updateUrl ) {
         // running on userscripts.org domain
 
         document.body.setAttribute( "style",
                                     "visibility: hidden; overflow: hidden;" );
-        this.parseMetaInfo( this.installUrl ); // check if there is an update
+
+        // check if there is an update
+        this.parseMetaInfo( this.scriptInfo.installUrl );
         return true; // notify that this was the script meta page
       }
 
-      var loader = document.createElement( "iframe" );
+      loader = document.createElement( "iframe" );
       loader.setAttribute( "style", "position: absolute;" +
                                     "height: 0; width: 0;" );
       loader.addEventListener( "load", this.showUpdate, false );
@@ -294,24 +284,24 @@ frameElement */
     },
 
     parseMetaInfo: function( url ) {
-      var scriptInfo = document.body.innerHTML;
-      var updateAvailable;
+      var metaInfo = document.body.innerHTML,
+          hasUpdate = false;
 
       // compare script versions
-      if ( /@version\s*([\S]+)/.test( scriptInfo ) ) {
-        updateAvailable = this.version < RegExp.$1;
+      if ( /@version\s*([\S]+)/.test( metaInfo ) ) {
+        hasUpdate = this.scriptInfo.version < RegExp.$1;
 
       // compare script dates
-      } else if ( /@uso:timestamp\s*(\S.+)/.test( scriptInfo ) ) {
-        updateAvailable = new Date( this.date ) < new Date( RegExp.$1 );
+      } else if ( /@uso:timestamp\s*(\S[\da-zA-Z,:;+ ]+)/.test( metaInfo ) ) {
+        hasUpdate = new Date( this.scriptInfo.date ) < new Date( RegExp.$1 );
       }
 
-      if ( updateAvailable ) {
+      if ( hasUpdate ) {
         location.href = "data:text/html," +
           "<style>body{ visibility: visible; overflow: hidden;" +
           "font-family: Arial, sans-serif; color: #2244BB; }</style>" +
-          STRINGS.update + ": <a href=\"" + url + "\" target=\"_blank\">" +
-          STRINGS.install + "</a>";
+          STRINGS.updateLbl + ": <a href=\"" + url + "\" target=\"_blank\">" +
+          STRINGS.installLbl + "</a>";
       }
     },
 
@@ -321,7 +311,7 @@ frameElement */
         // return false;
       // }
 
-      this.loader.src = this.updateUrl;
+      this.loader.src = this.scriptInfo.updateUrl;
 
       // just check it every time the settings page is opened
       // storage.setItem( "last-check", new Date().getTime() + "" );
@@ -337,31 +327,35 @@ frameElement */
   };
 
   // user interface for script settings added on settings page
-  var settings = {
+  settings = {
     timeoutID: 0,
     entries: null,
 
     init: function() { // insert page color options into the settings page
+      var section = this.addPrefs(),
+          check = false;
+
       // ascend out of iframe
       this.entries = frameElement.ownerDocument.getElementById( "entries" );
 
-      var sect = this.addPrefs();
-
       // check for userscript updates
       // comment this section out if you want to disable update checks
-      var check = updater.check();
-      if ( check ) {
-        sect.insertBefore( check, sect.firstChild );
-      }
+      // check = updater.check();
+      // if ( check ) {
+      //  section.insertBefore( check, section.firstChild );
+      // }
     },
 
     addPrefs: function() {
-      var sect = document.createElement( "div" );
+      var sect = document.createElement( "div" ),
+          lists, list1, list2,
+          tc = bind( this.toggleColors, this );
+
       sect.className = "extra";
 
       // two column list
       sect.innerHTML = "<div class=\"extra-header\">Colors</div>" +
-                       STRINGS.color + "<div style=\"width: 30em;" +
+                       STRINGS.colorLbl + "<div style=\"width: 30em;" +
                                              "margin: 0pt 0pt 1em 1em;\">" +
                        "<ul style=\"list-style-type: none; padding-left: 0;" +
                             "float: right;\">" +
@@ -369,53 +363,53 @@ frameElement */
                        "<ul style=\"list-style-type: none;" +
                             "padding-left: 0;\">" +
                        "</ul></div>";
+      lists = sect.getElementsByTagName( "ul" );
+      list1 = lists[ 1 ];
+      list2 = lists[ 0 ];
 
-      $id( "setting-extras-body" ).appendChild( sect );
+      document.getElementById( "setting-extras-body" ).appendChild( sect );
 
-      var lists = sect.getElementsByTagName( "ul" );
-      var list1 = lists[ 1 ], list2 = lists[ 0 ];
-
-      var tc = bind( this.toggleColors, this );
-
-      this.addColorPref( list2, "gm-color-ri", STRINGS.read, tc );
-      this.addColorPref( list2, "gm-color-ui", STRINGS.unread, tc );
-      this.addColorPref( list1, "gm-color-lv", STRINGS.list, tc );
-      this.addColorPref( list1, "gm-color-ev", STRINGS.expanded, tc );
-      this.addColorPref( list1, "gm-color-ef", STRINGS.frame, tc, 0 );
-      this.addColorPref( list1, "gm-color-cv", STRINGS.comment, tc, 0 );
+      this.addColorPref( list2, "gm-color-ri", STRINGS.riLbl, tc );
+      this.addColorPref( list2, "gm-color-ui", STRINGS.uiLbl, tc );
+      this.addColorPref( list1, "gm-color-lv", STRINGS.lvLbl, tc );
+      this.addColorPref( list1, "gm-color-ev", STRINGS.evLbl, tc );
+      this.addColorPref( list1, "gm-color-ef", STRINGS.efLbl, tc, 0 );
+      // this.addColorPref( list1, "gm-color-cv", STRINGS.cvLbl, tc, 0 );
 
       return sect;
     },
 
     addColorPref: function ( list, id, text, handler, def ) {
-      var pref = document.createElement( "li" );
-      var selected = storage.getItem( id, ( typeof def == "undefined" ) ?
-                                          1 : def );
+      var pref = document.createElement( "li" ),
+          chk,
+          selected = storage.getItem( id, def === void 0 ? 1 : def );
+
       pref.innerHTML = "<label><input id=\"" + id + "\" type=\"checkbox\"/>" +
                        text + "</label>";
+      chk = pref.firstChild.firstChild;
 
       // just setting the "checked" attribute doesn't seem to work in Chrome
-      // I should figure out why later
-      var chk = pref.firstChild.firstChild;
+      // I should figure out why
+
       chk.checked = ( selected ) ? true : false;
       list.appendChild( pref );
       chk.addEventListener( "change", handler, false );
     },
 
     toggleColors: function( event ) {
-      var id = event.target.id, curr = event.target.checked;
-      var msg, newPref = "", cName = "";
+      var id = event.target.id, curr = event.target.checked,
+          msg = "", newPref = "", cName = "",
+          re = new RegExp( id + " |^", "g" );
 
       if ( curr ) {
         newPref = id;
         cName = id + " ";
-        msg = "<em>" + STRINGS.msgWill + "</em>";
+        msg = "<em>" + STRINGS.setMsg + "</em>";
       }
       else {
-        msg = "<em>" + STRINGS.msgWillNot + "</em>";
+        msg = "<em>" + STRINGS.unsetMsg + "</em>";
       }
 
-      var re = new RegExp( id + " |^", "g" );
       this.entries.className = this.entries.className.replace( re, cName );
       storage.setItem( id, newPref );
       this.setMessage( id, msg );
@@ -423,21 +417,22 @@ frameElement */
 
     setMessage: function( id, msg ) {
       clearTimeout( this.timeoutID );
-      var inner = $x( "id( 'message-area-inner' )" );
-      var outer = $x( "id( 'message-area-outer' )" );
+      var inner = document.getElementById( "message-area-inner" ),
+          outer = document.getElementById( "message-area-outer" ),
+          type = "", newMsg = "";
 
       // get the message string to insert into the page
-      var type = ( id == "gm-color-lv" ) ? STRINGS.msgList :
-                 ( id == "gm-color-ev" ) ? STRINGS.msgExpanded :
-                 ( id == "gm-color-ef" ) ? STRINGS.msgFrame :
-                 ( id == "gm-color-ui" ) ? STRINGS.msgUnread :
-                 ( id == "gm-color-ri" ) ? STRINGS.msgRead : 
-                 ( id == "gm-color-cv" ) ? STRINGS.msgComment :
-                 STRINGS.msgUndef;
+      type = ( id === "gm-color-lv" ) ? STRINGS.lvMsg :
+             ( id === "gm-color-ev" ) ? STRINGS.evMsg :
+             ( id === "gm-color-ef" ) ? STRINGS.efMsg :
+             ( id === "gm-color-ui" ) ? STRINGS.uiMsg :
+             ( id === "gm-color-ri" ) ? STRINGS.riMsg :
+             // ( id === "gm-color-cv" ) ? STRINGS.cvMsg :
+             STRINGS.udMsg;
 
-      var newMsg = type + msg + STRINGS.msgColored; 
+      newMsg = type + msg + STRINGS.colorMsg;
       inner.innerHTML = newMsg; // set the message
-      
+
       // force display and set position and width
       outer.setAttribute( "style", "display: block !important;" +
                           "margin-left:" +
@@ -450,7 +445,7 @@ frameElement */
 
         // test if the same message is still showing.
         // force lowercase to handle any (tag name) capitalization change
-        if ( inner.innerHTML.toLowerCase() == newMsg.toLowerCase() ) {
+        if ( inner.innerHTML.toLowerCase() === newMsg.toLowerCase() ) {
           outer.className = outer.className.replace( / hidden|$/, " hidden" );
         }
 
@@ -473,197 +468,251 @@ frameElement */
   };
 
   // controls and applies colors
-  var theme = {
+  theme = {
     colors: {}, // used to store the calculated colors
     prefs: "",  // pref settings
     bgColor: null, // theme settings
     textColor: null,
     styles: null, // dom node colorizing css will be injected into
+    entries: null, // NodeList of entries in reading list
+
+    // CSS to allow items to be colored
+    baseCss: "/* css to allow colors to apply */" +
+      "#entries .entry-likers, /* let colors show through */" +
+      "#entries.list .collapsed .entry-source-title," +
+      "#entries.list .collapsed .entry-secondary," +
+      "#entries.list .collapsed .entry-title {" +
+      // "#entries.comment-cards .entry-comments {" +
+      "  background-color: transparent !important;" +
+      "}" +
+      ".gm-color-lv .collapsed, /* list view headers */" +
+      "#entries.gm-color-ev.gm-color-ef .card {" +
+      // "#entries.comment-cards .entry .comment-entry /* comment view */ {" +
+      "  border-color: transparent !important;" +
+      "}" +
+      "#entries.cards.gm-color-ev .card-actions {" +
+      "  background-color: rgba( 0, 0, 0, 0.05 ) !important;" +
+      "}" +
+      "#entries.cards.gm-color-ev .card-bottom {" +
+      "  border-color: rgba( 0, 0, 0, 0.1 ) !important;" +
+      "}" +
+      "#entries.list.gm-color-lv #current-entry .collapsed {" +
+      "  border-width: 2px 0 !important;" +
+      "  border-color: #777777 !important;" + // this needs more contrast
+      "}" +
+      "#entries.list.gm-color-lv #current-entry.expanded .collapsed {" +
+      "  border-bottom-color: transparent !important;" +
+      "  border-width: 2px 0 !important;" +
+      "}" +
+      "#entries.cards.gm-color-ev .card," +
+      "#entries.cards.gm-color-ef .card {" +
+      "  padding-right: 1em;" +
+      "}" +
+      "#entries.cards.gm-color-ev:not(.gm-color-ef) .card-bottom {" +
+      "  margin-bottom: 1ex !important;" +
+      "}",
+      // "#entries .entry {" +
+      // "  padding: 5px 0;" +
+      // "}",
+      // "#entries.list .collapsed {" +
+      // "  line-height: 2.4ex !important; /* hide entry snippet 2nd line */" +
+      // "}" +
+      // "#entries .collapsed .entry-original," +
+      // ".entry .entry-title .entry-title-go-to { /* article link image */" +
+      // "  background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4A" +
+      // "AAAOBAMAAADtZjDiAAAALVBMVEX////R3fPm6/nJ1PPV3vXc5fbCz/He5fjCz/H////U3" +
+      // "/Tj6fjr7/r3+f3O2fTPDCQ+AAAAB3RSTlMA71DmxK0A9H5uGAAAAFtJREFUeF41jbEJgE" +
+      // "AUQx+CG1hYCm4gOICdpeACh5sIwk+jAxw3yI3iOY0I/jSBkLxANanpgFXSCLU+LfSWLWt" +
+      // "gtmRJB+1VnnLvSGc8o9w9957vnPNzA2zfT3gBaL8sJRF+PgoAAAAASUVORK5CYII=')" +
+      // "  no-repeat !important;" +
+      // "}" +
+      // ".entry .entry-title .entry-title-go-to {" +
+      // "  background-position: left 3px !important;" + */
+      // "}",
 
     init: function( chrome ) {
+      var setup = this.setup, thm = this,
+          set = function() {
+            setup.call( thm );
+            chrome.removeEventListener( "DOMNodeInserted", set, false );
+          };
+
+      addStyle( this.baseCss );
       this.styles = addStyle("/* css to color entries */");
       this.prefs = settings.getColorPrefs();
 
-      var setup = this.setup, thm = this;
-      var set = function() {
-        setup.call( thm );
-        chrome.removeEventListener( "DOMNodeInserted", set, false );
-      };
       chrome.addEventListener( "DOMNodeInserted", set, false );
     },
 
     setup: function() { // initial setup and toggling of settings
+      var prefs = this.prefs,
+          entries = document.getElementById( "entries" );
       this.initConfig(); // put this in here so theme scripts run first
-      var prefs = this.prefs;
-      var entries = $id( "entries" );
 
       if ( entries ) {
-        entries.className = prefs + entries.className; 
+        entries.className = prefs + entries.className;
         entries.addEventListener( "DOMNodeInserted",
                                   bind( this.process, this ), false );
+        this.entries = entries.getElementsByClassName( "entry" );
       }
     },
 
     // determine what color theme to use by looking at the header colors
     initConfig: function() {
-      var header = $id("chrome-header");
-      var bg = getComputedStyle( header, null)
-               .getPropertyValue( "background-color" );
+      var style = getComputedStyle( 
+                  document.getElementById( "viewer-container" ), null ),
+          bg = this.rgbToHsl( style.getPropertyValue( "background-color" ) ),
+          color = this.rgbToHsl( style.getPropertyValue( "color" ) );
 
-      bg = this.rgbToHsl( bg );
-
-      // a min saturation & lightness is needed to distinguish colors
-      // note: value is further subtracted from this for read items
+      // a min saturation & lightness is needed to distinguish colors.
+      // for read items, a value is further subtracted from these
       this.bgColor = { hue: bg[ 0 ],
                        sat: Math.max( bg[ 1 ], 35 ),
-                       lt: Math.max( bg[ 2 ], 32 ) };
+                       lt: Math.min( bg[ 2 ], 70 ) };
 
-      var color = getComputedStyle( header, null ).getPropertyValue( "color" );
-      color = this.rgbToHsl( color );
       this.textColor = { hue: color[ 0 ], sat: color[ 1 ], lt: color[ 2 ] };
       this.setTextColor();
     },
 
     rgbToHsl: function( color ) { // calculate hsl from rgb css color string
-      var hue = 0, sat = 0, lt;
+      var hue = 0, sat = 0, lt,
 
-      var rgb = this.getRgb( color );
-      var max = Math.max.apply( Math, rgb );
-      var min = Math.min.apply( Math, rgb );
-      var chroma = max - min;
+          rgb = this.getRgb( color ),
+          max = Math.max.apply( Math, rgb ),
+          min = Math.min.apply( Math, rgb ),
+          chroma = max - min,
 
-      var index = rgb.indexOf( max );
+          index = rgb.indexOf( max );
+
       rgb.splice( index, 1 );
 
       lt = ( max + min )/2;
-      if ( chroma ) {
-        sat = ( lt > 0.5 ) ? ( max - min )/( 2 - ( max + min ) ) :
-                             ( max - min )/( max + min );
-        hue = 60*( ( rgb[ 0 ] - rgb[ 1 ] )/( max - min ) + index*2 );
+      if ( chroma ) { // max not equal to min
+        sat = ( lt > 0.5 ) ? ( chroma )/( 2 - ( max + min ) ) :
+                             ( chroma )/( max + min );
+        hue = 60*( ( rgb[ 0 ] - rgb[ 1 ] )/( chroma ) + index*2 );
       }
 
       return [ hue, sat*100, lt*100 ];
     },
 
     getRgb: function( color ) {
-      var rgb;
+      var red, green, blue,
+          hexRegExp;
 
-      if ( ( rgb = /(\d+), (\d+), (\d+)/.exec( color ) ) ) {
-        rgb = rgb.slice( 1 );
-        return [ rgb[ 0 ]/255, rgb[ 1 ]/255, rgb[ 2 ]/255 ];
+      if ( /(\d+), (\d+), (\d+)/.test( color ) ) {
+        return [ RegExp.$1/255, RegExp.$2/255, RegExp.$3/255 ];
       }
 
-      // Opera return a hex value, so convert hex to decimal
-      if ( ( rgb = /#(......)/.exec( color ) ) ) {
-        rgb = parseInt( rgb[ 1 ], 16 );
-        var red = rgb >> 16;
-        var grn = ( rgb - ( red << 16 ) ) >> 8;
-        var blu = rgb - ( red << 16 ) - ( grn << 8 );
-        return [ red/255, grn/255, blu/255 ];
+      // Opera returns a hex value, so convert hex to decimal
+      hexRegExp = /#([A-Fa-f0-9]{2})([A-Fa-f0-9]{2})([A-Fa-f0-9]{2})/; // <-------------------------------------------------------------------- CHECKME
+
+      if ( hexRegExp.test( color ) ) {
+        red = parseInt( RegExp.$1, 16 );
+        green = parseInt( RegExp.$2, 16 );
+        blue = parseInt( RegExp.$3, 16 );
+
+        return [ red/255, green/255, blue/255 ];
       }
 
       return [ 1, 0, 0 ];
     },
 
     setTextColor: function() {
-      var hue = this.textColor.hue;
-      var sat = this.textColor.sat;
-      var lt = this.textColor.lt;
+      var hue = this.textColor.hue,
+          sat = this.textColor.sat,
+          lt = this.textColor.lt,
 
       // default color lightnesses:
       // bg lt: 85.3
       // color lt: 0
 
-      // text lightnesses are set to values in the range between title text and
-      // background color lightnesses
-      var range = this.bgColor.lt - lt;
+          // text lightnesses are set to values in the range between title text
+          // and background color lightnesses
+          range = this.bgColor.lt - lt,
 
-      var css = "  color: hsl(" + hue + "," + sat + "%, ";
+          css = "  color: hsl(" + hue + "," + sat + "%, ";
+
       this.styles.textContent += ( "" +
         "#entries .collapsed .entry-title {" +
         css + lt + "% ) !important;" + // 000000 <- default color
-        "}" + 
+        "}" +
         "#entries.list .collapsed .entry-main .entry-source-title {" +
         css + ( lt + range*0.42 ) + "% ) !important;" + // 555555
-        "}" + 
-        ".entry .entry-author," +
-        ".entry-comments .comment-time, .entry .entry-date {" +
+        "}" +
+        ".entry .entry-author, .entry .entry-date {" +
+        // ".entry-comments .comment-time {" +
         css + ( lt + range*0.50 ) + "% ) !important;" + // 666666
-        "}" + 
+        "}" +
         "#entries.list .collapsed .entry-secondary {" +
         css + ( lt + range*0.59 ) + "% ) !important;" + // 777777
         "}" +
         // "a, a:visited, .link {" + // shouldn't need to mess with link color
         // css + lt + "% ) !important;" + // 2244BB
-        // "}" + 
-        "#entries .item-body {" + 
+        // "}" +
+        "#entries .item-body {" +
         css + lt + "% ) !important;" + // 000000
         "}" );
     },
 
     // inject color css into the page
     process: function() {
-      var bgColor = this.bgColor;
-      var styles = this.styles;
-      var thm = this;
+      var bgColor = this.bgColor,
+          styles = this.styles,
+          thm = this,
 
-      // pick up all uncolored entries, including ones missed previously
-      var nocolor = $xa( "id( 'entries' )/div[ contains( @class, 'entry' ) ]" +
-                         "[ not( @colored ) ]" );
+         // pick up all uncolored entries, including ones missed previously
+         noColor = Array.prototype.slice.apply( this.entries );
+         noColor = noColor.filter(function( entry ) {
+                     return !entry.hasAttribute( "colored" );
+                   } );
 
-      if ( !nocolor.length ) {
+      if ( !noColor.length ) {
         return;
       }
 
-      nocolor.forEach( function( nc ) {
-        thm.setColor( styles, bgColor, nc );
+      noColor.forEach( function( nc ) {
+        thm.setColors( styles, bgColor, nc );
       } );
     },
 
-    setColor: function( styles, bgColor, nc ) {
+    setColors: function( styles, bgColor, nc ) {
 
-      // source in header is: "<a>" for expanded/comment view
-      //                      "<span>" for list view
-      // if "Shared by [xxx]" is there this will grab that
       // search for a node that has 'entry-source-title' class name
-      var src = $x( ".//*[ contains(" +
-                    "concat( ' ', normalize-space( @class ), ' ')," +
-                    "' entry-source-title ' ) ]", nc );
-      src = src.textContent.replace( /\W/g, "-" );
+      var title = nc.getElementsByClassName( "entry-source-title" )[ 0 ].
+                  textContent.replace( /\W/g, "-" );
 
-      nc.setAttribute( "colored", src );
-      if ( typeof this.colors[ src ] == "undefined" ) {
-        styles.textContent += this.getColorCss( src, bgColor );
+      nc.setAttribute( "colored", title );
+      if ( this.colors[ title ] === void 0 ) {
+        styles.textContent += this.getColorCss( title, bgColor );
       }
     },
 
     getColorCss: function( title, bgColor ) { // generate css to color items
-      var hue = this.getHue( title );
-      var sat = bgColor.sat;
-      var lt = bgColor.lt;
+      var hue = "background-color: hsl(" + this.getHue( title ),
+          imp = "% ) !important;",
+          sat = bgColor.sat,
+          lt = bgColor.lt,
 
-      // set direction entry lightness is modified on read/hover
-      var dir = ( lt > 50 ) ? 1 : -1;
+          // set direction entry lightness is modified on read/hover
+          dir = ( lt > 50 ) ? 1 : -1,
 
-      var hsl = { 
-        norm: "background-color: hsl(" +
-          hue + "," + ( sat + 7 ) + "%," + ( lt - dir*5 )+ "% ) !important;",
-        hover: "background-color: hsl(" +
-          hue + "," + ( sat + 27 ) + "%, " + lt + "% ) !important;",
-        read: "background-color: hsl(" +
-          hue + "," + ( sat - 13 ) + "%," + ( lt + dir*5 ) + "% ) !important;",
-        readhvr: "background-color: hsl(" +
-          hue + "," + ( sat + 7 ) + "%," + ( lt + dir*10 ) + "% ) !important;"
-      };
+          // need to clean this up
+          hsl = {
+            norm: hue + "," + ( sat + 7 ) + "%," + ( lt - dir*5 )+ imp,
+            hover: hue + "," + ( sat + 27 ) + "%, " + lt + imp,
+            read: hue + "," + ( sat - 13 ) + "%," + ( lt + dir*5 ) + imp,
+            readhvr: hue + "," + ( sat + 7 ) + "%," + ( lt + dir*10 ) + imp
+          };
 
       return this.getLvCss( title, hsl ) + this.getEvCss( title, hsl ) +
-             this.getEfCss( title, hsl ) + this.getCvCss( title, hsl );
+             this.getEfCss( title, hsl ); // + this.getCvCss( title, hsl );
     },
 
     getLvCss: function( ttl, hsl ) { // css for coloring items in list view
       // this selector should be take priority over any other selector
-      var us = "#entries.gm-color-lv.gm-color-ui div[ colored='" + ttl + "' ]";
-      var rs = "#entries.gm-color-lv.gm-color-ri div[ colored='" + ttl + "' ]";
+      var us = "#entries.gm-color-lv.gm-color-ui div[ colored='" + ttl + "' ]",
+          rs = "#entries.gm-color-lv.gm-color-ri div[ colored='" + ttl + "' ]";
 
       return "" +
         us + " .collapsed {" + hsl.norm + "}" +
@@ -679,8 +728,8 @@ frameElement */
 
     // css for coloring expanded view item bodies
     getEvCss: function( ttl, hsl ) {
-      var us = "#entries.gm-color-ev.gm-color-ui div[ colored='" + ttl + "' ]";
-      var rs = "#entries.gm-color-ev.gm-color-ri div[ colored='" + ttl + "' ]";
+      var us = "#entries.gm-color-ev.gm-color-ui div[ colored='" + ttl + "' ]",
+          rs = "#entries.gm-color-ev.gm-color-ri div[ colored='" + ttl + "' ]";
 
       return "" +
         us + " .card," +
@@ -719,8 +768,8 @@ frameElement */
 
     // css for coloring expanded view item frames
     getEfCss: function( ttl, hsl ) {
-      var us = "#entries.gm-color-ef.gm-color-ui div[ colored='" + ttl + "' ]";
-      var rs = "#entries.gm-color-ef.gm-color-ri div[ colored='" + ttl + "' ]";
+      var us = "#entries.gm-color-ef.gm-color-ui div[ colored='" + ttl + "' ]",
+          rs = "#entries.gm-color-ef.gm-color-ri div[ colored='" + ttl + "' ]";
 
       return "" +
         us + " {" + hsl.norm + "}" +
@@ -734,28 +783,29 @@ frameElement */
              hsl.readhvr + "}";
     },
 
-    getCvCss: function( ttl, hsl ) {
-      var us = "#entries.gm-color-cv.gm-color-ui div[ colored='" + ttl + "' ]";
-      var rs = "#entries.gm-color-cv.gm-color-ri div[ colored='" + ttl + "' ]";
+    // getCvCss: function( ttl, hsl ) {
+      // var us = "#entries.gm-color-cv.gm-color-ui div[ colored='" + ttl + "' ]",
+          // rs = "#entries.gm-color-cv.gm-color-ri div[ colored='" + ttl + "' ]";
 
       // comment view doesn't have read/unread
-      return  "" +
-        us + " .comment-entry {" + hsl.norm + "}" +
-        us + ":hover .comment-entry {" + hsl.hover + "}" +
-        us + ".read .comment-entry," +
-        us + ".read:hover .comment-entry { /* force no color for read items */ " +
-             "background-color: white !important; }" +
-        rs + ".read .comment-entry { /* override unread item colors */ " +
-             hsl.read + "}" +
-        rs + ".read:hover .comment-entry { /* override unread item colors */ " +
-             hsl.readhvr + "}";
-    },
+      // return  "" +
+        // us + " .comment-entry {" + hsl.norm + "}" +
+        // us + ":hover .comment-entry {" + hsl.hover + "}" +
+        // us + ".read .comment-entry," +
+        // us + ".read:hover .comment-entry { /* force no color for read items */ " +
+             // "background-color: white !important; }" +
+        // rs + ".read .comment-entry { /* override unread item colors */ " +
+             // hsl.read + "}" +
+        // rs + ".read:hover .comment-entry { /* override unread item colors */ " +
+             // hsl.readhvr + "}";
+    // },
 
     getHue: function( title ) { // calculate item hue
-      var hue = 0;
+      var hue = 0,
+          i = 0, cc = 0;
 
-      for ( var i = 0, ch; ( ch = title[ i ] ); i++ ) {
-        hue += ch.charCodeAt( 0 );
+      for ( i = 0; cc = title.charCodeAt( i ); i++ ) {
+        hue += cc;
       }
       hue %= 360;
 
@@ -769,7 +819,13 @@ frameElement */
 
 
   ( function() {
-    var chrome = $id( "chrome" );
+    var chrome = document.getElementById( "chrome" );
+
+    // test if this is a google reader sharing bookmarklet popup
+    if ( location.href.search( "link-frame" ) >= 0 ) {
+      return;
+    }
+
     storage.init();
 
     if ( chrome ) {
@@ -777,18 +833,13 @@ frameElement */
     }
 
     else { // settings and script meta info page have no "chrome" element
-      if ( updater.init() ) { // script meta info page
-        return;
-      }
+      // if ( updater.init() ) { // script meta info page
+      //   return;
+      // }
 
       settings.init();
     }
 
-    addStyle( BASE_CSS );
   }() );
 
 }() );
-
-// .toString() + ")();";
-
-// document.body.appendChild(script);
