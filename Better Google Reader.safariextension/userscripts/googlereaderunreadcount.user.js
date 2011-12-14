@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Google Reader Unread Count
-// @version         10
+// @version         11
 // @namespace       http://ellab.org/
 // @author          angusdev
 // @description     Display actual unread count instead of "1000+" in Google Reader
@@ -11,9 +11,10 @@
 /*
 Author: Angus http://angusdev.mysinablog.com/
               http://angusdev.blogspot.com/
-Date:   2010-06-09
+Date:   2011-11-06
 
 Version history:
+11   06-Nov-2011    Issue #32 Fix the problem on Google new version
 10   09-Jun-2010    Issue #14 Suppport Safari Extensions
 9    25-Nov-2009    Refactoring and optimization
                     Now will listen to each feed's unread count change and recalculate
@@ -109,7 +110,7 @@ function calcUnread() {
   var totalplus = false;
   var res = document.evaluate("//li[contains(@class, 'folder')]//li[contains(@class, 'folder')]", document, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
   for (var i=0;i<res.snapshotLength;i++) {
-    var res2 = document.evaluate(".//li[contains(@class, 'unread')]/a/span/span[contains(@class, 'unread-count')]", res.snapshotItem(i), null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+    var res2 = document.evaluate(".//li[contains(@class, 'unread')]/a/div[contains(@class, 'unread-count')]", res.snapshotItem(i), null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
     var subtotal = 0;
     var subtotalplus = false;
     for (var j=0;j<res2.snapshotLength;j++) {
@@ -124,7 +125,7 @@ function calcUnread() {
       }
     }
     if (subtotal > 0) {
-      var resfolder = document.evaluate(".//a/span/span[contains(@class, 'unread-count')]", res.snapshotItem(i), null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+      var resfolder = document.evaluate(".//a/div[contains(@class, 'unread-count')]", res.snapshotItem(i), null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
       if (resfolder) {
         resfolder.innerHTML = '&nbsp;(' + subtotal + (subtotalplus?'+':'') + ')';
       }
@@ -132,7 +133,7 @@ function calcUnread() {
   }
 
   // untagged items
-  var res2 = document.evaluate("//ul[@id='sub-tree']/li/ul/li[not(contains(@class, 'folder')) and contains(@class, 'unread')]/a/span/span[contains(@class, 'unread-count')]", document, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+  var res2 = document.evaluate("//ul[@id='sub-tree']/li/ul/li[not(contains(@class, 'folder')) and contains(@class, 'unread')]/a/div[contains(@class, 'unread-count')]", document, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
   for (var j=0;j<res2.snapshotLength;j++) {
     var result = findItemUnread(checkDuplicated, res2.snapshotItem(j));
     if (result.hasplus) {

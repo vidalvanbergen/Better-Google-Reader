@@ -8,13 +8,23 @@
 // @include        http://userscripts.org/scripts/source/8782.meta.js
 // @description    Colors items in Google Reader.
 // @author         kepp
-// @jsversion      1.6
 // @updateURL      http://userscripts.org/scripts/source/8782.meta.js
-// @version        20111105
+// @version        20111209
 // ==/UserScript==
 
 
 /**
+ * 2011-12-09
+ * Correct dates in change log.
+ * Removed jsversion metadata as not useful/inaccurate.
+ * Limit saturation and lightness ranges to better match previous color scheme.
+ *  Quick fix. Future release will make the colors user adjustable.
+ * Additional fixes for Google Reader style update.
+ *  Seems additional changes were rolled out after my last update.
+ * - Removed option to color entry frames. Needs rework with new styling.
+ * - Use box-shadow to emphasize currently selected entry. Want to change
+ *   background color to do this, but not feasible at this point.
+ **
  * 2011-11-05
  * Remove JSLint config sections and other testing leftovers.
  * Remove $id shortcut function. Inline function.
@@ -22,7 +32,7 @@
  * Remove $xa shortcut function. Replace with getElementsByClassName NodeList.
  * Change test for undefined to use "void 0".
  * Change base css from global variable to theme controller object property.
- * Reorgaize storage code and change tests for GM and DOM Stroage.
+ * Reorgaize storage code and change tests for GM and DOM Storage.
  * Update string property names to be more consistent, maybe.
  * Use strict equality operators for everything.
  * Use stricter version parsing regular expression in updater.
@@ -43,10 +53,10 @@
  * - Added semi-transparent card actions background.
  * - Removed unused CSS.
  **
- * 2011-02-27
+ * 2011-02-16
  * Update for Greasemonkey 9.0 compatibility
  **
- * 2010-02-27
+ * 2010-02-26
  * Fix for updates not showing.
  * Substituted custom image for those used to link to the original article.
  * Consolidated where styles are inserted.
@@ -74,7 +84,7 @@
  * Fix for coloring unread items only in list view.
  * Added Google Chrome support.
  **
- * 2009-08-22
+ * 2009-08-21
  * Fix to ensure that all items get colored.
  * Fixes for Google Reader update.
  * Added script update notification to the settings page.
@@ -92,7 +102,7 @@
  * Works on expanded view too now. Possible/easier with Google Reader now using
  *  CSS for rounded borders.
  **
- * 2008-11-04
+ * 2008-12-04
  * Added settings for coloring read/unread items.
  * Adjusted things in the settings.
  **
@@ -110,7 +120,7 @@
     colorLbl:   "Color these items:",
     lvLbl:      "List view headers.",
     evLbl:      "Expanded view entry bodies.",
-    efLbl:      "Expanded view entry frames.",
+    // efLbl:      "Expanded view entry frames.",
     // cvLbl:      "Comment view entries.",
     riLbl:      "Read items.",
     uiLbl:      "Unread items.",
@@ -123,7 +133,7 @@
     colorMsg:   " be colored.",
     lvMsg:      "List view items ",
     evMsg:      "Expanded view entry bodies ",
-    efMsg:      "Expanded view entry frames ",
+    // efMsg:      "Expanded view entry frames ",
     // cvMsg:      "Comment view items ",
     uiMsg:      "Unread items ",
     riMsg:      "Read items ",
@@ -373,7 +383,7 @@
       this.addColorPref( list2, "gm-color-ui", STRINGS.uiLbl, tc );
       this.addColorPref( list1, "gm-color-lv", STRINGS.lvLbl, tc );
       this.addColorPref( list1, "gm-color-ev", STRINGS.evLbl, tc );
-      this.addColorPref( list1, "gm-color-ef", STRINGS.efLbl, tc, 0 );
+      // this.addColorPref( list1, "gm-color-ef", STRINGS.efLbl, tc, 0 );
       // this.addColorPref( list1, "gm-color-cv", STRINGS.cvLbl, tc, 0 );
 
       return sect;
@@ -424,7 +434,7 @@
       // get the message string to insert into the page
       type = ( id === "gm-color-lv" ) ? STRINGS.lvMsg :
              ( id === "gm-color-ev" ) ? STRINGS.evMsg :
-             ( id === "gm-color-ef" ) ? STRINGS.efMsg :
+             // ( id === "gm-color-ef" ) ? STRINGS.efMsg :
              ( id === "gm-color-ui" ) ? STRINGS.uiMsg :
              ( id === "gm-color-ri" ) ? STRINGS.riMsg :
              // ( id === "gm-color-cv" ) ? STRINGS.cvMsg :
@@ -457,8 +467,8 @@
 
       prefs += storage.getItem( "gm-color-lv", "gm-color-lv" ) + " ";
       prefs += storage.getItem( "gm-color-ev", "gm-color-ev" ) + " ";
-      prefs += storage.getItem( "gm-color-ef", "" ) + " ";
-      prefs += storage.getItem( "gm-color-cv", "" ) + " ";
+      // prefs += storage.getItem( "gm-color-ef", "" ) + " ";
+      // prefs += storage.getItem( "gm-color-cv", "" ) + " ";
 
       prefs += storage.getItem( "gm-color-ui", "gm-color-ui" ) + " ";
       prefs += storage.getItem( "gm-color-ri", "gm-color-ri" ) + " ";
@@ -485,31 +495,35 @@
       // "#entries.comment-cards .entry-comments {" +
       "  background-color: transparent !important;" +
       "}" +
-      ".gm-color-lv .collapsed, /* list view headers */" +
-      "#entries.gm-color-ev.gm-color-ef .card {" +
+      // ".gm-color-lv .collapsed /* list view headers */ {" +
+      // "#entries.gm-color-ev.gm-color-ef .card {" +
       // "#entries.comment-cards .entry .comment-entry /* comment view */ {" +
-      "  border-color: transparent !important;" +
-      "}" +
+      // "  border-color: transparent !important;" +
+      // "}" +
       "#entries.cards.gm-color-ev .card-actions {" +
       "  background-color: rgba( 0, 0, 0, 0.05 ) !important;" +
       "}" +
       "#entries.cards.gm-color-ev .card-bottom {" +
       "  border-color: rgba( 0, 0, 0, 0.1 ) !important;" +
       "}" +
-      "#entries.list.gm-color-lv #current-entry .collapsed {" +
-      "  border-width: 2px 0 !important;" +
-      "  border-color: #777777 !important;" + // this needs more contrast
-      "}" +
-      "#entries.list.gm-color-lv #current-entry.expanded .collapsed {" +
-      "  border-bottom-color: transparent !important;" +
-      "  border-width: 2px 0 !important;" +
-      "}" +
-      "#entries.cards.gm-color-ev .card," +
-      "#entries.cards.gm-color-ef .card {" +
+      // "#entries.list.gm-color-lv #current-entry .collapsed {" +
+      // "  border-width: 2px 0 !important;" +
+      // "  border-color: #777777 !important;" + // this needs more contrast
+      // "}" +
+      // "#entries.list.gm-color-lv #current-entry.expanded .collapsed {" +
+      // "  border-bottom-color: transparent !important;" +
+      // "  border-width: 2px 0 !important;" +
+      // "}" +
+      "#entries.cards.gm-color-ev .card {" +
+      // "#entries.cards.gm-color-ef .card {" +
       "  padding-right: 1em;" +
       "}" +
-      "#entries.cards.gm-color-ev:not(.gm-color-ef) .card-bottom {" +
+      "#entries.cards.gm-color-ev .card-bottom {" +
       "  margin-bottom: 1ex !important;" +
+      "}" +
+      "#current-entry {" +
+      "  box-shadow: 0 0 1px 2px rgb(22, 88, 120);" +
+      "  z-index: 99999999;" +
       "}",
       // "#entries .entry {" +
       // "  padding: 5px 0;" +
@@ -567,8 +581,8 @@
       // a min saturation & lightness is needed to distinguish colors.
       // for read items, a value is further subtracted from these
       this.bgColor = { hue: bg[ 0 ],
-                       sat: Math.max( bg[ 1 ], 35 ),
-                       lt: Math.min( bg[ 2 ], 70 ) };
+                       sat: Math.max( Math.min( bg[ 1 ], 73 ), 50 ),
+                       lt: Math.max( Math.min( bg[ 2 ], 85 ), 10 ) };
 
       this.textColor = { hue: color[ 0 ], sat: color[ 1 ], lt: color[ 2 ] };
       this.setTextColor();
@@ -705,8 +719,8 @@
             readhvr: hue + "," + ( sat + 7 ) + "%," + ( lt + dir*10 ) + imp
           };
 
-      return this.getLvCss( title, hsl ) + this.getEvCss( title, hsl ) +
-             this.getEfCss( title, hsl ); // + this.getCvCss( title, hsl );
+      return this.getLvCss( title, hsl ) + this.getEvCss( title, hsl ); // +
+             // this.getEfCss( title, hsl ) + this.getCvCss( title, hsl );
     },
 
     getLvCss: function( ttl, hsl ) { // css for coloring items in list view
@@ -715,15 +729,19 @@
           rs = "#entries.gm-color-lv.gm-color-ri div[ colored='" + ttl + "' ]";
 
       return "" +
-        us + " .collapsed {" + hsl.norm + "}" +
-        us + ":hover .collapsed {" + hsl.hover + "}" +
-        us + ".read .collapsed," +
-        us + ".read:hover .collapsed { /* force no color for read items */ " +
-             "background-color: white !important; }" +
+        us + ":not( .read ) .collapsed {" + hsl.norm + "}" +
+        us + ":not( .read ):hover .collapsed {" + hsl.hover + "}" +
+
         rs + ".read .collapsed { /* override unread item colors */" +
              hsl.read + "}" +
         rs + ".read:hover .collapsed { /* override unread item colors */ " +
-             hsl.readhvr + "}";
+             hsl.readhvr + "}" +
+
+        "#entries.gm-color-lv.gm-color-ui:not( .gm-color-ri ) .read .collapsed," +
+        "#entries.gm-color-lv.gm-color-ri:not( .gm-color-ui ) :not( .read ) .collapsed {" +
+        "  /* override current entry colors */" +
+        "  background-color: white !important;" +
+        "}";
     },
 
     // css for coloring expanded view item bodies
@@ -767,21 +785,21 @@
     },
 
     // css for coloring expanded view item frames
-    getEfCss: function( ttl, hsl ) {
-      var us = "#entries.gm-color-ef.gm-color-ui div[ colored='" + ttl + "' ]",
-          rs = "#entries.gm-color-ef.gm-color-ri div[ colored='" + ttl + "' ]";
+    // getEfCss: function( ttl, hsl ) {
+      // var us = "#entries.gm-color-ef.gm-color-ui div[ colored='" + ttl + "' ]",
+          // rs = "#entries.gm-color-ef.gm-color-ri div[ colored='" + ttl + "' ]";
 
-      return "" +
-        us + " {" + hsl.norm + "}" +
-        us + ":hover {" + hsl.hover + "}" +
-        us + ".read," +
-        us + ".read:hover { /* force no color for read items */ " +
-             "background-color: #F3F5FC !important; }" +
-        rs + ".read { /* override unread item colors */ " +
-             hsl.read + "}" +
-        rs + ".read:hover { /* override unread item colors */ " +
-             hsl.readhvr + "}";
-    },
+      // return "" +
+        // us + " {" + hsl.norm + "}" +
+        // us + ":hover {" + hsl.hover + "}" +
+        // us + ".read," +
+        // us + ".read:hover { /* force no color for read items */ " +
+             // "background-color: #F3F5FC !important; }" +
+        // rs + ".read { /* override unread item colors */ " +
+             // hsl.read + "}" +
+        // rs + ".read:hover { /* override unread item colors */ " +
+             // hsl.readhvr + "}";
+    // },
 
     // getCvCss: function( ttl, hsl ) {
       // var us = "#entries.gm-color-cv.gm-color-ui div[ colored='" + ttl + "' ]",

@@ -1,3 +1,6 @@
+v1.0.1
+[New] Updated Colorful list view and Reader Count scripts.
+
 v1.0
 [New] Updated for the new google reader layout.
 
